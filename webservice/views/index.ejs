@@ -1,0 +1,39 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="/libraries/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript">
+        (function($) {
+            function ajaxErrorHandler(a, b, c) { 
+                console.log(a, b, c);
+                $(this).empty();
+                $(this).append("Error");
+            }
+
+            $(function() {
+                $("#requestAccount").click(function () {
+                    $.ajax("/users/get/", {
+                        cache: false,
+                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                        context: $("#account"),
+                        error: ajaxErrorHandler,
+                        success: function (data) {
+                            $(this).empty();
+                            $(this).append("<ul><li>" + data.authUserId + "</li><li>" + data.fullName + "</li></ul>");
+                        }
+                    });
+                });
+            });
+        }(jQuery));
+    </script>
+</head>
+
+<body>
+    <h2>Hello, <%= user.displayName %>.</h2>
+
+    <button id="requestAccount">Account</button>
+    
+    <div id="account"></div>
+</body>
+
+</html>
