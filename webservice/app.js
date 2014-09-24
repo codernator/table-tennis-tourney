@@ -1,11 +1,26 @@
 /*jshint browser: false, devel: false, debug: true, evil: true, forin: true, es5: false, undef: true, node: true, bitwise: false, eqnull: true, noarg: true, noempty: true, eqeqeq: true, boss: true, loopfunc: true, laxbreak: true, strict: true, curly: true, nonew: true, jquery: false */
 
-function renderSimpleView(request, response) {
+function renderSimpleView(api, request, response) {
     "use strict";
     var path = request.path, // eg: /account
         viewName = path.substring(1); // eg: account;
 
-    response.render(viewName, { user: request.user });
+    response.render(viewName, { user: request.user, api: api });
+}
+
+function renderRootView(dal, api, request, response) {
+    "use strict";
+    var account = dal.accounts.getInterface(dal.organizationId, request.user.id).get(request.user.id),
+        profile = dal.profiles.getInterface(dal.organizationId, request.user.id).get(account.profileKey),
+        view;
+
+    if (profile.profileKey === 0) {
+        view = "profile";
+    } else {
+        view = "index";
+    }
+
+    response.render(view, { user: request.user, api: api });
 }
 
 // Simple route middleware to ensure user is authenticated.
@@ -71,19 +86,27 @@ function configurePassport(config) {
 
 (function () {
     "use strict";
-
     var config = require('./config.json'),
         express = require('express'),
         mongoose = require('mongoose'),
+        dal = {
+            organizationId: config.OrganizationId,
+            accounts: require("../api/accounts.js")(mongoose),
+            profiles: require("../api/profiles.js")(mongoose)
+        },
         api = {
             accounts: require("./webapi/accounts.js")(config.OrganizationId, mongoose),
+            departments: require("./webapi/departments.js")(config.OrganizationId, mongoose)
+        },
+        my = {
+            renderSimpleView: function(request, response) { return renderSimpleView(api, request, response); },
+            renderRootView: function(request, response) { return renderRootView(dal, api, request, response); }
         },
         app = express(),
         passport = configurePassport(config);
 
     app.set('views', __dirname + '/views');
     app.set('view engine', 'ejs');
-    //app.use(express.logger());
     app.use(require('cookie-parser')());
     app.use(require('body-parser')());
     app.use(require('method-override')(config.MethodOverrideKey));
@@ -92,8 +115,8 @@ function configurePassport(config) {
     app.use(passport.session()); // Use passport.session() middleware to support persistent login sessions.
     app.use(express.static(__dirname + '/public')); // jshint ignore:line
 
-    app.get('/', ensureAuthenticated, renderSimpleView);
-    app.get('/login', renderSimpleView);
+    app.get('/', ensureAuthenticated, my.renderRootView);
+    app.get('/login', my.renderSimpleView);
     app.get('/users/get/:id?', ensureAuthenticated, api.accounts.get);
 
     // GET /auth/google

@@ -1,0 +1,12 @@
+UL.no-bullets {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+UL.entry-form {
+}
+
+UL.entry-form LABEL {
+    display: inline-block;
+}

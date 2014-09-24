@@ -2,12 +2,11 @@ var module_model = null;
 function createModel(mongoose) {
     "use strict";
     if (!module_model) {
-        module_model = mongoose.model("Account", mongoose.Schema({
-                accountKey: Number,
-                authenticator: String,
-                authUserId: String,
-                organizationId: Number,
+        module_model = mongoose.model("Profile", mongoose.Schema({
                 profileKey: Number,
+                gender: String,
+                departmentKey: Number,
+                locationKey: Number,
                 since: Date,
                 auditUserId: Number
             }));
@@ -16,29 +15,23 @@ function createModel(mongoose) {
     return module_model;
 }
 
+
 module.exports = function (mongoose) {
     "use strict";
     var Model = createModel(mongoose);
 
-    function get(audit, authUserId) {
-        if (!authUserId) {
-            return null;
-        }
-
+    function get(audit, profileKey) {
         var model = new Model();
-        model.authenticator = "None";
-        model.authUserId = authUserId;
-        model.since = new Date();
+        model.profileKey = 0;
         return model;
     }
 
-    function create(audit, authenticator, authUserId) {
+    function create(audit, gender, departmentKey, locationKey) {
         var model = new Model();
-        model.accountKey = 1;
-        model.authenticator = authenticator;
-        model.authUserId = authUserId;
-        model.organizationId = audit.organizationId;
-        model.profileKey = 0;
+        model.profileKey = 1;
+        model.gender = gender;
+        model.departmentKey = departmentKey;
+        model.locationKey = locationKey;
         model.since = new Date();
         model.auditUserId = audit.userId;
         return model;
@@ -58,10 +51,10 @@ module.exports = function (mongoose) {
             var audit = { organizationId: auditOrganizationId, userId: auditUserId };
 
             return {
-                get: function (authUserId) { return get(audit, authUserId); },
+                get: function (profileKey) { return get(audit, profileKey); },
                 list: function () { return list(audit); },
-                create: function (authenticator, authUserId) {
-                    return create(audit, authenticator, authUserId);
+                create: function (gender, departmentKey, locationKey) {
+                    return create(audit, gender, departmentKey, locationKey);
                 },
                 listByRole: function (role) { return listByRole(audit, role); }
             };

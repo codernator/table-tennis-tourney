@@ -1,17 +1,28 @@
 module.exports = function (organizationId, dataProvider) {
-    var api = require("../../api/accounts.js")(dataProvider);
+    "use strict";
+    var accountsApi = require("../../api/accounts.js")(dataProvider),
+        profilesApi = require("../../api/profiles.js")(dataProvider),
+        departmentsApi = require("../../api/departments.js")(dataProvider);
 
-    function translateAccount(account, auditUserId) {
+    function translate(account, auditUserId) {
+        var profile = profilesApi.getInterface(organizationId, auditUserId).get(account.profileKey),
+            department = departmentsApi.getInterface(organizationId, auditUserId).get(account.departmentKey);
+
         var model = {
             accountKey: account.accountKey,
-            since: account.since
+            since: account.since,
+            profile: {
+                profileKey: profile.profileKey,
+                gender: profile.gender,
+                department: { "departmentKey": department.departmentKey, "name": department.Name },
+                location: { "locationKey": 0, "name": "TODO" }
+            }
         };
 
-        if (auditUserId == account.authUserId) {
+        if (auditUserId === account.authUserId) {
             // protected fields.
             // SECURITY MODEL will also include these fields when audit user has proper permissions.
             model.authUserId = account.authUserId; 
-            model.fullName = account.fullName;
             model.authenticator = account.authenticator;
         }
 
@@ -23,15 +34,16 @@ module.exports = function (organizationId, dataProvider) {
             id = params.id,
             auditUser = request.user,
             auditUserId = auditUser.id,
-            iface = api.getInterface(organizationId, auditUserId),
-            account = iface.get(id);
+            iface = accountsApi.getInterface(organizationId, auditUserId),
+            account = iface.get(id),
+            profile;
 
         if (!account) {
-            account = iface.create("Google", auditUserId, auditUser.name);
+            console.log({"Create":auditUserId});
+            account = iface.create("Google", auditUserId);
         }
 
-        console.log({"id":id, "account":account});
-        response.send(translateAccount(account));
+        response.send(translate(account, auditUserId));
     }
 
     return {
