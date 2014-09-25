@@ -8,7 +8,8 @@ function createModel(mongoose) {
                 departmentKey: Number,
                 locationKey: Number,
                 since: Date,
-                auditUserId: Number
+                organizationKey: Number,
+                auditUserId: String
             }));
     }
     
@@ -16,7 +17,7 @@ function createModel(mongoose) {
 }
 
 
-module.exports = function (mongoose) {
+module.exports = function (organizationKey, mongoose, mongodb) {
     "use strict";
     var Model = createModel(mongoose);
 
@@ -33,6 +34,7 @@ module.exports = function (mongoose) {
         model.departmentKey = departmentKey;
         model.locationKey = locationKey;
         model.since = new Date();
+        model.organizationKey = organizationKey;
         model.auditUserId = audit.userId;
         return model;
     }
@@ -47,8 +49,8 @@ module.exports = function (mongoose) {
 
 
     return {
-        getInterface: function(auditOrganizationId, auditUserId) {
-            var audit = { organizationId: auditOrganizationId, userId: auditUserId };
+        getInterface: function(auditUserId) {
+            var audit = { userId: auditUserId };
 
             return {
                 get: function (profileKey) { return get(audit, profileKey); },

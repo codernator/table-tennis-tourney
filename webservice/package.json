@@ -1,6 +1,6 @@
 {
     "name": "BD-Table-Tennis-Tournaments",
-    "description": "Track history of table tennis tournaments at Advent: Black Diamond, with individual and team scores.",
+    "description": "Track history of table tennis tournaments at Advent: Jacksonville, with individual and team scores.",
     "keywords": ["table-tennis", "tournament", "rating"],
     "version": "0.0.1",
     "dependencies": {
@@ -12,8 +12,9 @@
         "body-parser": "~1.3.0",
         "cookie-parser": "~1.1.0",
         "method-override": "~2.0.2",
+        "mongodb-uri": "~0.9.7",
         "mongoose": "~3.8.12",
-        "mongoose-id-autoinc", "~2013.7.14-4"
+        "mongoose-id-autoinc": "~2013.7.14-4"
     },
     "author": "Brandon Griffin <brandon.l.griffin@gmail.com>",
     "contributors": [ "Brian Hasden <bhasden@gmail.com>", "Ralph Bou Mechrek <rboumechrek@gmail.com>" ],

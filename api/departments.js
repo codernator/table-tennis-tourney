@@ -4,16 +4,16 @@ function createModel(mongoose) {
     if (!module_model) {
         module_model = mongoose.model("Department", mongoose.Schema({
                 departmentKey: Number,
-                organizationId: Number,
+                organizationKey: Number,
                 name: String,
-                auditUserId: Number            
+                auditUserId: String
             }));
     }
     
     return module_model;
 }
 
-module.exports = function (mongoose) {
+module.exports = function (organizationKey, mongoose, mongodb) {
     "use strict";
     var Model = createModel(mongoose),
         departments;
@@ -21,7 +21,7 @@ module.exports = function (mongoose) {
     function get(audit, departmentKey) {
         var cc = departments.length,
             dd;
-            
+
         while (cc-- > 0) {
             dd = departments[cc];
             if (dd.departmentKey === departmentKey) {
@@ -43,14 +43,14 @@ module.exports = function (mongoose) {
         var model = new Model();
         model.departmentKey = departmentKey;
         model.name = name;
-        model.organizationId = audit.organizationId;
+        model.organizationKey = organizationKey;
         model.auditUserId = audit.userId;
         return model;
     }
 
     return {
-        getInterface: function(auditOrganizationId, auditUserId) {
-            var audit = { organizationId: auditOrganizationId, userId: auditUserId };
+        getInterface: function(auditUserId) {
+            var audit = { userId: auditUserId };
 
             /* TEMP */
             departments = [

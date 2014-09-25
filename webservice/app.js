@@ -10,8 +10,8 @@ function renderSimpleView(api, request, response) {
 
 function renderRootView(dal, api, request, response) {
     "use strict";
-    var account = dal.accounts.getInterface(dal.organizationId, request.user.id).get(request.user.id),
-        profile = dal.profiles.getInterface(dal.organizationId, request.user.id).get(account.profileKey),
+    var account = dal.accounts.getInterface(request.user.id).get(request.user.id),
+        profile = dal.profiles.getInterface(request.user.id).get(account.profileKey),
         view;
 
     if (profile.profileKey === 0) {
@@ -84,19 +84,40 @@ function configurePassport(config) {
     return passport;
 }
 
+function loadConfiguration() {
+    "use strict";
+    var args = process.argv.slice(2),
+        config = require('./config.json');
+
+    /* TODO - More robust parsing of args (prefer switch style /dbuser= /password=).  Validation of config. etc. */
+    if (args.length > 0) {
+        // The first 2 command-line arguments override Mongo Db user and password in config.json.
+        config.Mongo.DbUser = args[1];
+        config.Mongo.Password = args[2];
+    }
+    
+    return config;
+}
+
+function loadDataModule(path, config, mongoose) {
+    "use strict";
+    return require(path)(config.OrganizationId, mongoose, config.Mongo);
+}
+
 (function () {
     "use strict";
-    var config = require('./config.json'),
+    var config = loadConfiguration(),
         express = require('express'),
         mongoose = require('mongoose'),
+        uriUtil = require('mongodb-uri'),
         dal = {
-            organizationId: config.OrganizationId,
-            accounts: require("../api/accounts.js")(mongoose),
-            profiles: require("../api/profiles.js")(mongoose)
+            accounts: loadDataModule("../api/accounts.js", config, mongoose),
+            profiles: loadDataModule("../api/profiles.js", config, mongoose),
+            departments: loadDataModule("../api/departments.js", config, mongoose)
         },
         api = {
-            accounts: require("./webapi/accounts.js")(config.OrganizationId, mongoose),
-            departments: require("./webapi/departments.js")(config.OrganizationId, mongoose)
+            accounts: require("./webapi/accounts.js")(dal),
+            departments: require("./webapi/departments.js")(dal)
         },
         my = {
             renderSimpleView: function(request, response) { return renderSimpleView(api, request, response); },
@@ -148,5 +169,5 @@ function configurePassport(config) {
         response.redirect('/');
     });
 
-    app.listen(3000);
+    app.listen(config.HostPort);
 }());

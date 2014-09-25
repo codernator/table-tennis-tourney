@@ -1,11 +1,18 @@
 {
+    "OrganizationId": 1,
     "SessionSecret": "<reducted>",
     "MethodOverrideKey": "<reducted>",
+    "HostPort": 3000,
     "PassportCallbackBase": "http://127.0.0.1:3000/auth/",
     "Google": {
         "ClientId": "<reducted>",
         "ClientSecret": "<reducted>",
         "Callback": "google/callback",
         "PassportScope": ["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
+    },
+    "Mongo": {
+        "Uri": "<let this be the portion of the mongoDB standard URI following the @ symbol.  Do not put username & password here!>",
+        "DbUser": "<optional - this alternatively can be specified on the command line.>",
+        "Password": "<optional - this alternatively can be specified on the command line.>",
     }
 }

@@ -1,12 +1,8 @@
-module.exports = function (organizationId, dataProvider) {
+module.exports = function (dataProvider) {
     "use strict";
-    var accountsApi = require("../../api/accounts.js")(dataProvider),
-        profilesApi = require("../../api/profiles.js")(dataProvider),
-        departmentsApi = require("../../api/departments.js")(dataProvider);
-
     function translate(account, auditUserId) {
-        var profile = profilesApi.getInterface(organizationId, auditUserId).get(account.profileKey),
-            department = departmentsApi.getInterface(organizationId, auditUserId).get(account.departmentKey);
+        var profile = dataProvider.profiles.getInterface(auditUserId).get(account.profileKey),
+            department = dataProvider.departments.getInterface(auditUserId).get(account.departmentKey);
 
         var model = {
             accountKey: account.accountKey,
@@ -34,7 +30,7 @@ module.exports = function (organizationId, dataProvider) {
             id = params.id,
             auditUser = request.user,
             auditUserId = auditUser.id,
-            iface = accountsApi.getInterface(organizationId, auditUserId),
+            iface = dataProvider.accounts.getInterface(auditUserId),
             account = iface.get(id),
             profile;
 

@@ -1,7 +1,5 @@
-module.exports = function (organizationId, dataProvider) {
+module.exports = function (dataProvider) {
     "use strict";
-    var api = require("../../api/departments.js")(dataProvider);
-
     function translate(department) {
         var model = {
             departmentKey: department.departmentKey,
@@ -14,8 +12,7 @@ module.exports = function (organizationId, dataProvider) {
     function get (request, response) {
         var params = request.params,
             id = params.id,
-            iface = api.getInterface(organizationId, request.user.id),
-            department = iface.get(id),
+            department = dataProvider.departments.getInterface(request.user.id).get(id),
             translated;
 
         translated = translate(department);
@@ -24,8 +21,7 @@ module.exports = function (organizationId, dataProvider) {
     
     function list (request, response) {
         var params = request.params,
-            iface = api.getInterface(organizationId, request.user.id),
-            departments = iface.list(),
+            departments = dataProvider.departments.getInterface(request.user.id).list(),
             cc = departments.length,
             translated = [];
 
