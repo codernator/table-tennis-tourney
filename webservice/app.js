@@ -10,17 +10,25 @@ function renderSimpleView(api, request, response) {
 
 function renderRootView(dal, api, request, response) {
     "use strict";
-    var account = dal.accounts.getInterface(request.user.id).get(request.user.id),
-        profile = dal.profiles.getInterface(request.user.id).get(account.profileKey),
-        view;
+    var errorHandler = require("./webapi/error-handler");
 
-    if (profile.profileKey === 0) {
-        view = "profile";
-    } else {
-        view = "index";
-    }
+    dal.accounts.getInterface(request.user.id).get(request.user.id).then(function (account) {
+        dal.profiles.getInterface(request.user.id).get(account.profileKey).then(function (profile) {
+            var view;
 
-    response.render(view, { user: request.user, api: api });
+            if (profile.profileKey === 0) {
+                view = "profile";
+            } else {
+                view = "index";
+            }
+
+            response.render(view, { user: request.user, api: api });
+        }, function (error) {
+            errorHandler.handle(error);
+        });
+    }, function (error) {
+        errorHandler.handle(error);
+    });
 }
 
 // Simple route middleware to ensure user is authenticated.
@@ -95,7 +103,7 @@ function loadConfiguration() {
         config.Mongo.DbUser = args[1];
         config.Mongo.Password = args[2];
     }
-    
+
     return config;
 }
 
@@ -109,19 +117,18 @@ function loadDataModule(path, config, mongoose) {
     var config = loadConfiguration(),
         express = require('express'),
         mongoose = require('mongoose'),
-        uriUtil = require('mongodb-uri'),
         dal = {
-            accounts: loadDataModule("../api/accounts.js", config, mongoose),
-            profiles: loadDataModule("../api/profiles.js", config, mongoose),
-            departments: loadDataModule("../api/departments.js", config, mongoose)
+            accounts: loadDataModule("../data-mongo/accounts.js", config, mongoose),
+            profiles: loadDataModule("../data-mongo/profiles.js", config, mongoose),
+            departments: loadDataModule("../data-mongo/departments.js", config, mongoose)
         },
         api = {
             accounts: require("./webapi/accounts.js")(dal),
             departments: require("./webapi/departments.js")(dal)
         },
         my = {
-            renderSimpleView: function(request, response) { return renderSimpleView(api, request, response); },
-            renderRootView: function(request, response) { return renderRootView(dal, api, request, response); }
+            renderSimpleView: function (request, response) { return renderSimpleView(api, request, response); },
+            renderRootView: function (request, response) { return renderRootView(dal, api, request, response); }
         },
         app = express(),
         passport = configurePassport(config);
