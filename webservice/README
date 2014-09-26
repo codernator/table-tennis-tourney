@@ -1,1 +1,32 @@
-.
+# Overview
+
+The webservice hosts a Web application using nodejs-express framework. Authentication is provided by oauth and data access is provided by mongoose.  The web application primarily serves players who would register for tournaments and track their win/loss performance statistics.  A secondary function of the application is to serve tournament administrators who would create announcements, or define tournaments, divisions, and other important meta information.
+
+# Configuration
+Important configuration items include Google passport secret keys, Mongo database connection parameters, and session settings.
+
+The configuration file is not published.  Copy the file config.json.template to config.json and then open config.json.
+
+## Sessions
+> SessionSecret: This is a salt used to protect session data.  Any random string of characters will do.
+> MethodOverrideKey: The middle-ware "method-override" allows HTTP version in places where the client doesn't support it. This key is used by the module to protect data.  Any random string of characters will do.
+
+## Google Passport
+See: https://developers.google.com/accounts/docs/OAuth2Login
+
+> PassportCallbackBase: this is the root path to the handler for authentication within the application.  The default value probably need not be changed.
+> Google.ClientId: This is provided by Google OAuth setup.
+> Google.ClientSecret: Also provided by Google OAuth setup.
+> Google.Callback: The route within the application that handles the response from OAuth.  The default value probably need not be changed.
+> Google.PassportScope: This indicates what information from OAuth will be requested by the Web application. If this scope changes, the template should be changed to ensure future installs have the correct configuration.
+
+## Mongo
+> Mongo.Uri: This represents the portion of the connection URI following the user:pass@ section.  It must not contain user or pass.
+> Mongo.DbUser: This is the user that connects to the database.  You can fill in this config, or specify the user on the command-line when starting the application.  Command-line will always override configuration.
+> Mongo.Password: The password used in the connection string. The rules for this are the same as for the DbUser value.
+
+# Execution
+The application accepts two optional arguments to override Mongo.DbUser and Mongo.Password in the config file.
+
+    node app.js [DbUser] [DbPassword]
+
