@@ -9,7 +9,7 @@ The configuration file is not published.  Copy the file config.json.template to 
 
 ## Sessions
 > SessionSecret: This is a salt used to protect session data.  Any random string of characters will do.
-> MethodOverrideKey: The middle-ware "method-override" allows HTTP version in places where the client doesn't support it. This key is used by the module to protect data.  Any random string of characters will do.
+> MethodOverrideKey: The middle-ware "method-override" allows HTTP verbs in places where the client doesn't support it. This key is used by the module to protect data.  Any random string of characters will do.
 
 ## Google Passport
 See: https://developers.google.com/accounts/docs/OAuth2Login
