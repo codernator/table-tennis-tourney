@@ -15,7 +15,8 @@
         "mongodb-uri": "~0.9.7",
         "mongoose": "~3.8.12",
         "mongoose-id-autoinc": "~2013.7.14-4",
-        "promise": "~6.0.0"
+        "promise": "~6.0.0",
+        "jshint": "~2.5.6" 
     },
     "author": "Brandon Griffin <brandon.l.griffin@gmail.com>",
     "contributors": [ "Brian Hasden <bhasden@gmail.com>", "Ralph Bou Mechrek <rboumechrek@gmail.com>" ],

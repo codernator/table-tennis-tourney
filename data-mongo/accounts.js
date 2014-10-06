@@ -1,4 +1,4 @@
-var Promise = require("promise"),
+var TpPromise = require("promise"),
     mongooseModule = require("./mongoose-module");
 
 module.exports = function (organizationKey, mongoose, mongodb) {
@@ -7,50 +7,63 @@ module.exports = function (organizationKey, mongoose, mongodb) {
             accountKey: Number,
             authenticator: String,
             authUserId: String,
-            organizationKey: Number,
-            profileKey: Number,
+            organizationKey: mongoose.Schema.Types.ObjectId,
+            profileKey: mongoose.Schema.Types.ObjectId,
             since: Date,
             auditUserId: Number
         });
 
     function get(audit, authUserId) {
-        return new Promise(function (resolve, reject) {
+        return new TpPromise(function (resolve, reject) {
             if (!authUserId) {
+                console.log("No ID");
                 resolve(null);
             }
 
-            /*temp*/
-            var model = new Model({
-                accountKey: 1,
-                authenticator: "",
-                authUserId: authUserId,
-                organizationKey: organizationKey,
-                profileKey: 0,
-                since: new Date(),
-                auditUserId: audit.userId
+            console.log("Connecting...");
+            var db = mongooseModule.createConnection();
+            console.log("Finding");
+            Model.findOne({ authUserId: authUserId }).exec(function (error, user) {
+                console.log("Done. Closing.");
+                db.close();
+                if (error) {
+                    console.log("Rejecting on error.", error);
+                    reject(new Error(error));
+                } else {
+                    console.log("Resolving on user.", user);
+                    resolve(user); // expect user to be null if not yet in database.
+                }
             });
-
-            resolve(model);
         });
     }
 
-    function create(audit, authenticator, authUserId) {
-        return new Promise(function (resolve, reject) {
-            var model = new Model({
-                accountKey: 1, /*temp*/
-                authenticator: authenticator,
-                authUserId: authUserId,
-                organizationKey: organizationKey,
-                profileKey: 0,
-                since: new Date(),
-                auditUserId: audit.userId
-            });
-            resolve(model);
+    function create(audit, authenticator, authUserId, profileKey) {
+        return new TpPromise(function (resolve, reject) {
+            var db,
+                model;
+
+            try {
+                db = mongooseModule.createConnection();
+                model = new Model({
+                    authenticator: authenticator,
+                    authUserId: authUserId,
+                    organizationKey: organizationKey,
+                    profileKey: profileKey,
+                    since: new Date(),
+                    auditUserId: audit.userId
+                });
+                model.save();
+                resolve(model);
+            } catch (error) {
+                reject(new Error(error));
+            } finally {
+                db.close();
+            }
         });
     }
 
     function listByRole(audit, role) {
-        return new Promise(function (resolve, reject) {
+        return new TpPromise(function (resolve, reject) {
             resolve([]);
         });
     }
@@ -62,7 +75,7 @@ module.exports = function (organizationKey, mongoose, mongodb) {
 
             return {
                 get: function (authUserId) { return get(audit, authUserId); },
-                create: function (authenticator, authUserId) { return create(audit, authenticator, authUserId); },
+                create: function (authenticator, authUserId, profileKey) { return create(audit, authenticator, authUserId, profileKey); },
                 listByRole: function (role) { return listByRole(audit, role); }
             };
         }

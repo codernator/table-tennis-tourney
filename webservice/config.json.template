@@ -1,5 +1,5 @@
 {
-    "OrganizationId": 1,
+    "OrganizationId": "5432d5bcdf772a1c220b2cd9",
     "SessionSecret": "<reducted>",
     "MethodOverrideKey": "<reducted>",
     "HostPort": 3000,
@@ -16,3 +16,4 @@
         "Password": "<optional - this alternatively can be specified on the command line.>",
     }
 }
+

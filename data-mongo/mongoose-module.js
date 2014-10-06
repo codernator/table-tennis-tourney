@@ -1,27 +1,33 @@
+var TpPromise = require("promise");
+
 module.exports = (function () {
     "use strict";
     var cachedModel = null,
         mongoose,
-        mongodb,
+        uri,
         uriUtil = require('mongodb-uri');
 
     function model(name, schema) {
+        var db;
+        
         if (!cachedModel) {
-            cachedModel = mongoose.model(name, mongoose.Schema(schema));
+            db = mongoose.createConnection(uri);
+            cachedModel = db.model(name, mongoose.Schema(schema));
         }
         return cachedModel;
     }
 
-    function connect() {
+    function createConnection() {
+        return mongoose.createConnection(uri);
     }
 
     return {
-        init: function (mymongoose, mymongodb) {
+        init: function (mymongoose, mongodb) {
             mongoose = mymongoose;
-            mongodb = mymongodb;
+            uri = "mongodb://" + mongodb.DbUser + ":" + mongodb.Password + "@" + mongodb.Uri;
             return this;
         },
         model: model,
-        connect: connect
+        createConnection: createConnection
     };
 }());

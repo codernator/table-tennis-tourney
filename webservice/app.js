@@ -12,20 +12,17 @@ function renderRootView(dal, api, request, response) {
     "use strict";
     var errorHandler = require("./webapi/error-handler");
 
+    console.log("Rendering root view.");
     dal.accounts.getInterface(request.user.id).get(request.user.id).then(function (account) {
-        dal.profiles.getInterface(request.user.id).get(account.profileKey).then(function (profile) {
-            var view;
+        var view;
 
-            if (profile.profileKey === 0) {
-                view = "profile";
-            } else {
-                view = "index";
-            }
+        if (account === null || account.profileKey === 0) {
+            view = "profile";
+        } else {
+            view = "index";
+        }
 
-            response.render(view, { user: request.user, api: api });
-        }, function (error) {
-            errorHandler.handle(error);
-        });
+        response.render(view, { user: request.user, api: api });
     }, function (error) {
         errorHandler.handle(error);
     });
@@ -52,7 +49,7 @@ function configurePassport(config) {
     function googleValidate(accessToken, refreshToken, profile, done) {
         // asynchronous verification, for effect...
         process.nextTick(function () {
-            // To keep the example simple, the user's Google profile is returned to
+
             // represent the logged-in user.  In a typical application, you would want
             // to associate the Google account with a user record in your database,
             // and return that user instead.
@@ -117,6 +114,7 @@ function loadDataModule(path, config, mongoose) {
     var config = loadConfiguration(),
         express = require('express'),
         mongoose = require('mongoose'),
+        bodyParser = require('body-parser'),
         dal = {
             accounts: loadDataModule("../data-mongo/accounts.js", config, mongoose),
             profiles: loadDataModule("../data-mongo/profiles.js", config, mongoose),
@@ -136,16 +134,22 @@ function loadDataModule(path, config, mongoose) {
     app.set('views', __dirname + '/views');
     app.set('view engine', 'ejs');
     app.use(require('cookie-parser')());
-    app.use(require('body-parser')());
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded());
     app.use(require('method-override')(config.MethodOverrideKey));
     app.use(require('express-session')({ secret: config.SessionSecret }));
     app.use(passport.initialize());
     app.use(passport.session()); // Use passport.session() middleware to support persistent login sessions.
     app.use(express.static(__dirname + '/public')); // jshint ignore:line
 
+
+    // Routing
+    // =================================================================================================
     app.get('/', ensureAuthenticated, my.renderRootView);
     app.get('/login', my.renderSimpleView);
     app.get('/users/get/:id?', ensureAuthenticated, api.accounts.get);
+
+    app.post('/users/put/:id?', ensureAuthenticated, api.accounts.put);
 
     // GET /auth/google
     //   Use passport.authenticate() as route middleware to authenticate the
@@ -175,6 +179,7 @@ function loadDataModule(path, config, mongoose) {
         request.logout();
         response.redirect('/');
     });
+    // =================================================================================================
 
     app.listen(config.HostPort);
 }());

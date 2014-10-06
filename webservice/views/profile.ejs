@@ -9,9 +9,6 @@
     <script type="text/javascript">
         (function($) {
             $(function() {
-                $("#actSave").click(function () {
-                    alert ("TODO");
-                });
             });
         }(jQuery));
     </script>
@@ -23,32 +20,34 @@
     <p>
         Please tell us about yourself.  This information will be used to register you in various divisions during tournaments.
     </p>
-    <ul class="no-bullets entry-form">
-        <li>
-            <label for="inGender">Gender</label>
-                <input type="radio" value="N" name="inGender" checked="checked">Unspecified</input>
-                <input type="radio" value="F" name="inGender">Female</input>
-                <input type="radio" value="M" name="inGender">Male</input>
-        </li>
-        <li>
-            <label for="inDepartment">Department</label>
-                <select name="inDepartment">
-                    <option value="-1">Unspecified</option>
-                    <option value="0">TODO</option>
-                </select>
-        </li>
-        <li>
-            <label for="inLocation">Location</label>
-                <select name="inLocation">
-                    <option value="-1">Unspecified</option>
-                    <option value="0">East-side</option>
-                    <option value="1">West-side</option>
-                </select>
-        </li>
-        <li>
-            <button id="actSave">Save</button>
-        </li>
-    </ul>
+    <form method="post" action="/users/put">
+        <ul class="no-bullets entry-form">
+            <li>
+                <label for="inGender">Gender</label>
+                    <input type="radio" value="N" name="inGender" checked="checked">Unspecified</input>
+                    <input type="radio" value="F" name="inGender">Female</input>
+                    <input type="radio" value="M" name="inGender">Male</input>
+            </li>
+            <li>
+                <label for="inDepartment">Department</label>
+                    <select name="inDepartment">
+                        <option value="-1">Unspecified</option>
+                        <option value="0">TODO</option>
+                    </select>
+            </li>
+            <li>
+                <label for="inLocation">Location</label>
+                    <select name="inLocation">
+                        <option value="-1">Unspecified</option>
+                        <option value="0">East-side</option>
+                        <option value="1">West-side</option>
+                    </select>
+            </li>
+            <li>
+                <button id="actSave">Save</button>
+            </li>
+        </ul>
+    </form>
 </body>
 
 </html>
